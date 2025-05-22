@@ -689,3 +689,223 @@ summary(model.morph.out.conf)
 print(emmeans(model.morph.out.conf, pairwise ~ Congruence | Block))
 contrast(emmeans(model.morph.out.conf, ~ Congruence * Block), interaction = "pairwise")
 
+
+
+
+
+
+##################################
+#### Sort detection task data ####
+##################################
+
+# extract df for detection task
+df.detection <- df.all[!is.na(df.all$Valence),]
+# only keep columns that we need
+extract_detection <- c('ID','Valence','Seen','Prime','Target','prime_exp_7.tStart','mask_8.tStart','stim_file')
+df.detection <- df.detection[,extract_detection]
+# exclude from detection df outlier participants 
+df.detection <- df.detection[!df.detection$ID %in% out.ppt$ID,]
+length(unique(df.detection$ID)) # check how many participants there are
+
+
+#################################
+#### Signal detection theory ####
+#################################
+
+
+### dprime
+
+# add a column Target for happy sad and morph primes and control for control primes
+df.detection$Stim <- ifelse(df.detection$Prime %in% c("Happy", "Sad", "Morph"), "Target", "Control")
+df.detection$Participant <- df.detection$ID
+
+# define functions
+std <- function(x) sd(x)/sqrt(length(x))
+
+dprime <- function(hit,fa) {
+  qnorm(hit) - qnorm(fa)
+}
+
+beta <- function(hit,fa) {
+  zhr <- qnorm(hit)
+  zfar <- qnorm(fa)
+  exp(-zhr*zhr/2+zfar*zfar/2)
+}
+
+#create a function to compute dprime at the group level
+compdprime <- function(subdata,anscol, ans, stimcol, stimsame, stimdiff) {
+  subdata <- as.data.frame(subdata)
+  subdata$hit <- ifelse(subdata[stimcol] == stimsame & subdata[anscol] ==  ans, 1,0)
+  subdata$fa <- ifelse(subdata[stimcol] == stimdiff & subdata[anscol] == ans, 1,0)
+  if (length(unique(subdata$Participant))==1) {
+    hit.rate <- mean(subdata[subdata[stimcol]==stimsame,]$hit)
+    fa.rate <- mean(subdata[subdata[stimcol]==stimdiff,]$fa)
+  }
+  else{
+    hit.rate <- with(subdata[subdata[stimcol]==stimsame,], tapply(hit, Participant, mean))
+    fa.rate <- with(subdata[subdata[stimcol]==stimdiff,], tapply(fa, Participant, mean))
+  }
+  
+  # apply corrections
+  hit.rate[(hit.rate)==1]<- (nrow(subdata[subdata[stimcol]==stimsame,])-0.5)/nrow(subdata[subdata[stimcol]==stimsame,])
+  hit.rate[(hit.rate)==0]<- (0.5)/nrow(subdata[subdata[stimcol]==stimdiff,])
+  fa.rate[(fa.rate)==0]<- (0.5)/nrow(subdata[subdata[stimcol]==stimdiff,])
+  fa.rate[(fa.rate)==1]<- (nrow(subdata[subdata[stimcol]==stimsame,])-0.5)/nrow(subdata[subdata[stimcol]==stimsame,])
+  
+  
+  return(list(dprime(hit.rate, fa.rate),hit.rate,fa.rate, beta(hit.rate, fa.rate)))
+  
+}
+
+
+# before calculating dprime, check who has aberrant responses to detection task
+# check proportion of seen trials per ID then per prime
+seenID <- aggregate(df.detection, Seen ~ ID + Stim, mean)
+# plot it
+ggplot(seenID, aes(x = (ID), y = Seen, fill = Stim)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "ID", y = "Proportion Seen", title = "Proportion of Seen per ID by Stim Type") +
+  scale_fill_manual(values = c("Target" = "#69b3a2", "Control" = "#f6ae2d")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# exclude from visibility analyses those who answered always seen or have control > target
+seenID.wide <- seenID %>%
+  pivot_wider(names_from = Stim, values_from = Seen)
+
+seenID.wide$diff <- seenID.wide$Control - seenID.wide$Target
+seen.out <- seenID.wide[seenID.wide$diff >= 0 | seenID.wide$Control>0.75,]
+seen.out <- seen.out[seen.out$Target!=0 | seen.out$Control!=0,]
+
+df.detection <- df.detection[!df.detection$ID %in% seen.out$ID,]
+
+
+### 1. calculate visibility dprime 
+###################################
+
+subjdprime_visibility <- data.frame(compdprime(df.detection,'Seen', 1, 'Stim' , 'Target', 'Control')[1])
+names(subjdprime_visibility) <- "dprime"
+subjdprime_visibility['hit'] <- data.frame(compdprime(df.detection,'Seen', 1, 'Stim' , 'Target', 'Control')[2])
+subjdprime_visibility['fa'] <- data.frame(compdprime(df.detection,'Seen', 1, 'Stim' , 'Target', 'Control')[3])
+subjdprime_visibility$Participant <- as.factor(rownames(subjdprime_visibility))
+subjdprime_visibility <- subjdprime_visibility[subjdprime_visibility$Participant %in% df.detection$ID,]
+subjdprime_visibility$ID <- subjdprime_visibility$Participant
+
+# mean dp
+mean(subjdprime_visibility$dprime, na.rm=T)
+
+# compute accuracy
+accuracy <- subjdprime_visibility %>%
+  summarise(
+    mean_accuracy = mean(hit * 100, na.rm = TRUE)
+  )
+
+# t-test
+t_test_dprime <- t.test(subjdprime_visibility$dprime, mu = 0)
+print(t_test_dprime) 
+
+
+### 2 : visibility happy versus sad prime
+##########################################
+
+# only keep happy and sad primes
+df.dprime.HS <- df.detection[df.detection$Prime== 'Happy' | df.detection$Prime== 'Sad' ,]
+df.dprime.HS <- df.dprime.HS[df.dprime.HS$Target== 'Happy' | df.dprime.HS$Target== 'Sad' ,]
+
+# calculate d' for happy vs. sad prime perception
+subjdprime_happySad <- data.frame(compdprime(df.detection,'Valence', 1, 'Prime' , 'Happy', 'Sad')[1])
+names(subjdprime_happySad) <- "dprime"
+subjdprime_happySad['hit'] <- data.frame(compdprime(df.detection,'Valence', 1, 'Prime' , 'Happy', 'Sad')[2])
+subjdprime_happySad['fa'] <- data.frame(compdprime(df.detection,'Valence', 1, 'Prime' , 'Happy', 'Sad')[3])
+subjdprime_happySad$Participant <- as.factor(rownames(subjdprime_happySad))
+subjdprime_happySad <- subjdprime_happySad[subjdprime_happySad$Participant %in% df.detection$ID,]
+subjdprime_happySad$ID <- subjdprime_happySad$Participant
+ggplot(subjdprime_happySad, aes(x = dprime)) +
+  geom_histogram(aes(y = stat(density)), bins = 30, fill = "#69b3a2", alpha = 0.7) +
+  geom_density(color = "#f6ae2d", alpha = 0.8) +
+  ggtitle("Distribution of d-prime happy/sad per participant") +
+  theme_minimal()
+
+# mean happy-sad dprime
+mean(subjdprime_happySad$dprime, na.rm=T) # 1.63
+
+# compute accuracy
+accuracy <- subjdprime_happySad %>% 
+  summarise(mean_accuracy = mean(hit * 100, na.rm = TRUE)) 
+
+# t-test
+print(t.test(subjdprime_happySad$dprime, mu = 0)) 
+
+
+# correlate subjdprime happy sad with priming effect
+# check correlation between the priming effect and the prime visibility on masked trials
+## happy
+happy.corr <- df.happy.corr[df.happy.corr$Block=='subliminal',]
+happy.corr <- happy.corr[happy.corr$Prime=='Happy' | happy.corr$Prime=='Sad',]
+happy.cong <- happy.corr[, c("ID", "Prime", "RT", "Target","Block")]
+happy.cong <- aggregate(happy.cong, RT ~ Prime + ID, mean)
+
+happy.cong <- happy.cong %>%
+  pivot_wider(
+    names_from = Prime,    
+    values_from = RT)
+
+happy.cong$deltaH <- happy.cong$Sad - happy.cong$Happy
+
+## sad targets
+sad.corr <- df.sad.corr[df.sad.corr$Block=='subliminal',]
+sad.cong <- sad.corr[, c("ID", "Prime", "RT", "Target","Block")]
+sad.cong <- aggregate(sad.cong, RT ~ Prime + ID, mean)
+
+sad.cong <- sad.cong %>%
+  pivot_wider(
+    names_from = Prime,    
+    values_from = RT)
+
+sad.cong$deltaS <- sad.cong$Happy - sad.cong$Sad
+
+
+# combine happy and sad targets for priming effects
+overall.cong <- merge(happy.cong,sad.cong, by='ID')
+overall.cong$overall.priming <- rowMeans(overall.cong[, c("deltaH", "deltaS")])
+
+# combine with dprime
+overall.cong <- merge(overall.cong,subjdprime_happySad, by="ID",)
+
+### Graph: 
+ggplot(overall.cong, aes(x = dprime, y = overall.priming)) + 
+  geom_point(color='#2f4858', alpha=0.8) + 
+  geom_smooth(method = 'lm', alpha = 0.3, color ='#2f4858') +
+  xlab("dprime Happy-Sad") + ylab("RT priming effects (ms)") + 
+  ggtitle("Healthy participants") +
+  theme_blank()+
+  theme(plot.title = element_text(size = 16),
+        axis.title.x = element_text(size = 16),   # x‐axis label
+        axis.title.y = element_text(size = 16),   # y‐axis label
+        axis.text.x  = element_text(size = 14),   # x‐axis tick labels
+        axis.text.y  = element_text(size = 14))+
+  
+  labs(tag = "A") +
+  theme(
+    plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
+    plot.tag = element_text(size = 18, face = "bold"))+
+  
+  annotate("text", x = 3.8, y = 100, label = "p = .780", 
+           size = 5, fontface = "italic")
+
+
+### Stats:
+
+# check normality before correlation
+shapiro.test(overall.cong$overall.priming) 
+shapiro.test(overall.cong$dprime) 
+
+cor.test(overall.cong$overall.priming, overall.cong$dprime)
+
+# check the significance of the intercept of this regression
+model.cong <- lm(overall.priming ~ dprime, data = overall.cong)
+residuals <- residuals(model.cong)
+shapiro.test(residuals)
+summary(model.cong)
+
+
