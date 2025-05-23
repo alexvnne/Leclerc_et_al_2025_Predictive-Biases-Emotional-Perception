@@ -268,6 +268,8 @@ desc_stats <- demographics %>%
 # exclude outlier participants from demographics df
 demographics <- demographics[!demographics$ID %in% out.ppt$ID,]
 
+
+
 # check that demographics and df.targets have the same number of ppts
 length(unique(df.target$ID))
 length(unique(demographics$ID))
@@ -907,5 +909,7 @@ model.cong <- lm(overall.priming ~ dprime, data = overall.cong)
 residuals <- residuals(model.cong)
 shapiro.test(residuals)
 summary(model.cong)
+
+
 
 
