@@ -301,7 +301,48 @@ length(unique(df.detection$ID)) # check how many participants there are
 write.csv(df.detection, '/data_detection_task_HC.csv')
 
 
+#########################
+#### extract data for PCA
+#########################
 
+# make the df for the PCA
+# #panas
+df.panas <- df.all[!is.na(df.all$slider_panas.response),]
+# only keep columns that we need
+extract_panas <- c('slider_panas.response','ID','words')
+df.panas <- df.panas[,extract_panas]
+panas_pca <- pivot_wider(df.panas, names_from = words, values_from = slider_panas.response)
+# delete excluded participants
+panas_pca <- panas_pca[!(panas_pca$ID %in% out.ppt$ID),]
 
+# #mathys
+df.mathys1 <- df.all[!is.na(df.all$slider_mathys1.response),]
+# only keep columns that we need
+extract_mathys1 <- c('ID','slider_mathys1.response','item_type','direction','left_side','right_side')
+df.mathys1 <- df.mathys1[,extract_mathys1]
+# some mathys items are reversed, inverse scores
+df.mathys1$slider_mathys1.response[df.mathys1$direction == "inverse"] <- 10 - df.mathys1$slider_mathys1.response[df.mathys1$direction == "inverse"]
+df.mathys1 <- df.mathys1 %>% mutate(item = ifelse(direction == "normal", right_side, left_side))
+extract_mathys1 <- c('ID','slider_mathys1.response','item')
+df.mathys1 <- df.mathys1[,extract_mathys1]
+mathys1_pca <- pivot_wider(df.mathys1, names_from = item, values_from = slider_mathys1.response)
+# delete excluded participants
+mathys1_pca <- mathys1_pca[!(mathys1_pca$ID %in% out.ppt$ID),]
 
+df.mathys2 <- df.all[!is.na(df.all$slider_mathys2.response),]
+# only keep columns that we need
+extract_mathys2 <- c('ID','slider_mathys2.response','words_mathys')
+df.mathys2 <- df.mathys2[,extract_mathys2]
+mathys2_pca <- pivot_wider(df.mathys2, names_from = words_mathys, values_from = slider_mathys2.response)
+# delete excluded participants
+mathys2_pca <- mathys2_pca[!(mathys2_pca$ID %in% out.ppt$ID),]
+
+# # merge them all
+pca_all <- merge(panas_pca, mathys1_pca, by='ID')
+pca_all <- merge(pca_all, mathys2_pca, by='ID')
+
+colnames(pca_all)[colnames(pca_all) == 'ID'] <- 'participant_id'
+pca_all$Group <- 'Healthy_Controls'
+# write csv with this df to later run the pca
+write.table(pca_all,"/pca_healthy_controls.csv")
 

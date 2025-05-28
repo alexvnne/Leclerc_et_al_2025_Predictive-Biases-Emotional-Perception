@@ -78,7 +78,7 @@ agg.morph <- agg.morph[agg.morph$Prime != 'Morph',]
 # plot effect of primes on morph categorization by priming_type 
 ggplot(agg.morph) + 
   aes(y = Response, x = Prime, fill = Prime, color = Prime) +
-  geom_boxplot(alpha = 0.55, width = 0.4, outlier.shape = NA, 
+  geom_boxplot(alpha = 0.6, width = 0.4, outlier.shape = NA, 
                position = position_dodge(width = 0.25)) +
   geom_jitter(aes(color = Prime), alpha = 0.6, size = 1.4, width = 0.15) +
   facet_wrap(~ Block, strip.position = 'bottom') +  
@@ -87,12 +87,12 @@ ggplot(agg.morph) +
   scale_color_manual(values = lPalette) +
   scale_fill_manual(values = lPalette) +
   ggtitle("Healthy participants") +
-  theme(plot.title = element_text(size = 16),
-        axis.title.x = element_text(size = 16),   # x‐axis label
-        axis.title.y = element_text(size = 16),   # y‐axis label
-        axis.text.x  = element_text(size = 14),   # x‐axis tick labels
-        axis.text.y  = element_text(size = 14),
-        strip.text.x = element_text(size = 14)) +
+  theme(plot.title = element_text(size = 21),
+        axis.title.x = element_text(size = 20),   # x‐axis label
+        axis.title.y = element_text(size = 20),   # y‐axis label
+        axis.text.x  = element_text(size = 18),   # x‐axis tick labels
+        axis.text.y  = element_text(size = 18),
+        strip.text.x = element_text(size = 18)) +
   
   theme(legend.position = "none")+
   geom_hline(yintercept = 0.5,
@@ -103,7 +103,7 @@ ggplot(agg.morph) +
   labs(tag = "A") +
   theme(
     plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
-    plot.tag = element_text(size = 18, face = "bold"))+
+    plot.tag = element_text(size = 21, face = "bold"))+
   
   # Masked
   geom_signif(data = subset(agg.morph, Block == "Masked"), 
@@ -111,7 +111,7 @@ ggplot(agg.morph) +
               annotations = c("**"), 
               y_position = 1.05, 
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
               color = "black") +
   
@@ -121,7 +121,7 @@ ggplot(agg.morph) +
               annotations = c("***"), 
               y_position = 1.05, 
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
               color = "black") +
   
@@ -131,9 +131,9 @@ ggplot(agg.morph) +
               annotations = c("**"), 
               y_position = 1.15, 
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
-              color = "black") 
+              color = "black")
 
 
 ### Stats: 
@@ -186,19 +186,19 @@ ggplot(df.morph.control, aes(x = PC1, y = Response)) +
   xlab("Mood (PC1)") + ylab("Probability of Positive Answer") + 
   ggtitle("Healthy participants") +
   theme_blank()+
-  theme(plot.title = element_text(size = 16),
-        axis.title.x = element_text(size = 16),   # x‐axis label
-        axis.title.y = element_text(size = 16),   # y‐axis label
-        axis.text.x  = element_text(size = 14),   # x‐axis tick labels
-        axis.text.y  = element_text(size = 14))+
+  theme(plot.title = element_text(size = 21),
+        axis.title.x = element_text(size = 20),   # x‐axis label
+        axis.title.y = element_text(size = 20),   # y‐axis label
+        axis.text.x  = element_text(size = 18),   # x‐axis tick labels
+        axis.text.y  = element_text(size = 18))+
   
   labs(tag = "A") +
   theme(
     plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
-    plot.tag = element_text(size = 18, face = "bold"))+
+    plot.tag = element_text(size = 21, face = "bold"))+
   
   annotate("text", x = 4, y = 0.9, label = "p = .025*", 
-           size = 5, fontface = "italic")
+           size = 6, fontface = "italic")
 
 ### Stats:
 # fit glmm
@@ -242,12 +242,12 @@ ggplot(agg.df.hs) +
   theme(
     #plot.title = element_text(hjust = 0.5, size = 12), 
     legend.position = "none",
-    plot.title = element_text(size = 16),
-    axis.title.x = element_text(size = 16),   # x‐axis label
-    axis.title.y = element_text(size = 16),   # y‐axis label
-    axis.text.x  = element_text(size = 14),   # x‐axis tick labels
-    axis.text.y  = element_text(size = 14),
-    strip.text.x = element_text(size = 14)
+    plot.title = element_text(size = 21, margin = margin(b = 35)),
+    axis.title.x = element_text(size = 20),   # x‐axis label
+    axis.title.y = element_text(size = 20),   # y‐axis label
+    axis.text.x  = element_text(size = 18),   # x‐axis tick labels
+    axis.text.y  = element_text(size = 18),
+    strip.text.x = element_text(size = 18)
   ) +
   scale_color_manual(values = rtPalette) +
   scale_fill_manual(values = rtPalette) +
@@ -255,7 +255,7 @@ ggplot(agg.df.hs) +
   labs(tag = "A") +
   theme(
     plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
-    plot.tag = element_text(size = 18, face = "bold"))+
+    plot.tag = element_text(size = 21, face = "bold"))+
   
   # Add significance bars for each condition separately
   # Masked
@@ -264,8 +264,9 @@ ggplot(agg.df.hs) +
               annotations = c("***"),  # Adjust p-value annotation
               y_position = 820,        # Adjust height of significance bar
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
+              size=0.8,
               color = "black")+
   
   # Unmasked
@@ -274,10 +275,10 @@ ggplot(agg.df.hs) +
               annotations = c("***"),  
               y_position = 820,        
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
-              color = "black")
-
+              size=0.8,
+              color = "black") 
 
 ### Stats:
 # fit a lmm
@@ -322,26 +323,21 @@ agg.morph <- aggregate(RT ~ ID + Prime + Block + Response + Congruence, data=df.
 ggplot(agg.morph) + aes(y=RT, x= Congruence, fill=Congruence, color=Congruence)+
   geom_violin(alpha=0.5)+
   labs(x = "Prime", y = "RT (ms)", title = 'Healthy participants')+
-  facet_wrap( ~ Block)+
+  facet_wrap( ~ Block, strip.position = 'bottom')+
   stat_summary(fun = mean, geom = "crossbar", width = 0.5, color = "black", fatten = 2) +  
   geom_jitter(width = 0.2, alpha =1)+
   theme_blank()+
   theme(
     legend.position = "none",
-    plot.title = element_text(size = 16),
-    axis.title.x = element_text(size = 16),   # x‐axis label
-    axis.title.y = element_text(size = 16),   # y‐axis label
-    axis.text.x  = element_text(size = 14),   # x‐axis tick labels
-    axis.text.y  = element_text(size = 14),
-    strip.text.x = element_text(size = 14)
+    plot.title = element_text(size = 21, margin = margin(b = 35)),
+    axis.title.x = element_text(size = 20),   # x‐axis label
+    axis.title.y = element_text(size = 20),   # y‐axis label
+    axis.text.x  = element_text(size = 20),   # x‐axis tick labels
+    axis.text.y  = element_text(size = 18),
+    strip.text.x = element_text(size = 18)
   ) +
   scale_color_manual(values=rtPalette)+
   scale_fill_manual(values = rtPalette)+
-  
-  labs(tag = "A") +
-  theme(
-    plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
-    plot.tag = element_text(size = 18, face = "bold"))+
   
   # Add significance bars for each condition separately
   # Masked
@@ -350,8 +346,9 @@ ggplot(agg.morph) + aes(y=RT, x= Congruence, fill=Congruence, color=Congruence)+
               annotations = c("***"),  
               y_position = 1300,        
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
+              size = 0.8,
               color = "black")
 
 
@@ -374,19 +371,19 @@ agg.morph.NoOutliers <- agg.morph[!agg.morph$ID %in% agg.morph.out$ID,]
 # new graph without outlier
 ggplot(agg.morph.NoOutliers) + aes(y=RT, x= Congruence, fill=Congruence, color=Congruence)+
   geom_violin(alpha=0.5)+
-  labs(x = "Prime", y = "RT (ms)", title = 'Healthy participants')+
+  labs(x = "Prime Congruence", y = "RT (ms)", title = 'Healthy participants')+
   facet_wrap( ~Block, strip.position = 'bottom')+
   stat_summary(fun = mean, geom = "crossbar", width = 0.5, color = "black", fatten = 2) +  
   geom_jitter(width = 0.2, alpha =1)+
   theme_blank()+
   theme(
     legend.position = "none",
-    plot.title = element_text(size = 16),
-    axis.title.x = element_text(size = 16),   # x‐axis label
-    axis.title.y = element_text(size = 16),   # y‐axis label
-    axis.text.x  = element_text(size = 14),   # x‐axis tick labels
-    axis.text.y  = element_text(size = 14),
-    strip.text.x = element_text(size = 14)
+    plot.title = element_text(size = 21, margin=margin(b=35)),
+    axis.title.x = element_text(size = 20),   # x‐axis label
+    axis.title.y = element_text(size = 20),   # y‐axis label
+    axis.text.x  = element_text(size = 18),   # x‐axis tick labels
+    axis.text.y  = element_text(size = 18),
+    strip.text.x = element_text(size = 18)
   ) +
   #plot.title = element_text(hjust = 0.5, size = 12), legend.position = "none") +
   scale_color_manual(values=rtPalette)+
@@ -396,7 +393,7 @@ ggplot(agg.morph.NoOutliers) + aes(y=RT, x= Congruence, fill=Congruence, color=C
   labs(tag = "A") +
   theme(
     plot.tag.position = c(0.02, 0.98),  # x, y in [0,1], (0,1) = top-left
-    plot.tag = element_text(size = 18, face = "bold"))+
+    plot.tag = element_text(size = 21, face = "bold"))+
   
   # Add significance bars for each condition separately
   # Masked
@@ -405,8 +402,9 @@ ggplot(agg.morph.NoOutliers) + aes(y=RT, x= Congruence, fill=Congruence, color=C
               annotations = c("***"),  
               y_position = 1050,        
               tip_length = 0.02, 
-              textsize = 4, 
+              textsize = 6, 
               vjust = 0.4, 
+              size=0.8,
               color = "black")
 
 # new summary statistics without outliers
