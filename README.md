@@ -4,7 +4,7 @@ Preprint: https://doi.org/10.31234/osf.io/ztyk6_v1
 ## Data
 Data are available upon request to the corresponding author (pauline@favre-univ.fr)
 ## Code
-We provide code used in our paper 
+We provide code used for data analysis in our paper 
 ## Bugs and questions
 Please contact Pauline Favre at pauline@favre-univ.fr for any questions
 
