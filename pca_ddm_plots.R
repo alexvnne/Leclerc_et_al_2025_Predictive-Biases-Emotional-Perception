@@ -274,6 +274,9 @@ ggplot(diffrep.pc1) +
         legend.title = element_text(size = 39,color='black')) 
 
 
+
+
+
 # PC2
 
 # sort from higher to lower
